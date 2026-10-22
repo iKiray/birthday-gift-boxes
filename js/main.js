@@ -336,6 +336,7 @@
   var ctx = canvas.getContext("2d");
   var particles = [];
   var rafId = null;
+  // Confetti colours — edit these hex values to change the burst.
   var COLORS = ["#f2b3bd", "#a9c9e8", "#cbb7ea", "#f7e2a4", "#a9dac8", "#eebfe0"];
 
   function confettiBurst(x, y) {
