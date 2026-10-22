@@ -1,0 +1,598 @@
+/* ---- page ---- */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f7edf5;
+  color: #634f60;
+}
+
+/* ---- bunting (decorative) ---- */
+
+.bunting {
+  --wave: 1;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+  height: 52px;
+  border-top: 3px solid #dbb6cc;
+}
+
+.bunting .flag {
+  flex: none;
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 38px solid #f2b3bd;
+}
+
+.bunting .flag:nth-child(5n + 2) { border-top-color: #f7e2a4; }
+.bunting .flag:nth-child(5n + 3) { border-top-color: #a9c9e8; }
+.bunting .flag:nth-child(5n + 4) { border-top-color: #cbb7ea; }
+.bunting .flag:nth-child(5n + 5) { border-top-color: #a9dac8; }
+
+/* gentle wave along the string */
+.bunting .flag:nth-child(7n + 1) { margin-top: calc(0px * var(--wave)); transform: rotate(0deg); }
+.bunting .flag:nth-child(7n + 2) { margin-top: calc(3px * var(--wave)); transform: rotate(-3deg); }
+.bunting .flag:nth-child(7n + 3) { margin-top: calc(6px * var(--wave)); transform: rotate(3deg); }
+.bunting .flag:nth-child(7n + 4) { margin-top: calc(8px * var(--wave)); transform: rotate(-2deg); }
+.bunting .flag:nth-child(7n + 5) { margin-top: calc(8px * var(--wave)); transform: rotate(2deg); }
+.bunting .flag:nth-child(7n + 6) { margin-top: calc(6px * var(--wave)); transform: rotate(-3deg); }
+.bunting .flag:nth-child(7n) { margin-top: calc(3px * var(--wave)); transform: rotate(3deg); }
+
+.page-header {
+  text-align: center;
+  padding: 1.75rem 1rem 1rem;
+}
+
+/* ribbon banner behind the heading */
+.page-header h1 {
+  display: inline-block;
+  margin: 0;
+  padding: 0.45em 2.2em;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  color: #7a4e70;
+  background: #f5c3d1;
+  transform: rotate(-1.5deg);
+  clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%);
+}
+
+.subhead {
+  margin: 0.5rem 0 0;
+  color: #86698a;
+}
+
+.recipient {
+  margin: 0.35rem 0 0;
+  font-weight: 600;
+  color: #a75a83;
+}
+
+.recipient:empty { display: none; }
+
+/* quiet reset control, top-left */
+.reset-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  font-size: 0.8rem;
+  color: #8f748c;
+  text-decoration: none;
+}
+
+.reset-link:hover {
+  color: #a75a83;
+  text-decoration: underline;
+}
+
+/* ---- background photos (decorative, scattered around the page) ---- */
+
+/* z-index: -1 keeps the layer behind all content but above the page colour */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  /* No wallpaper is included. To use one, drop it in images/ and replace
+     this line with:
+     background: #f7edf5 url("../images/page-bg.jpg") center / cover no-repeat; */
+  background: linear-gradient(160deg, #fdf4f9 0%, #f7edf5 45%, #edf3fb 100%);
+}
+
+/* polaroid-style frame: portrait print (3:4) on a white mat with polaroid
+   proportions — thin sides/top, thick bottom bar. js/main.js sets left/top
+   (offsets from the middle of the window) and --rot per picture; `x`/`y`
+   pins in `backgroundPhotos` land here as exact offsets. */
+.backdrop-photo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(160px, 32vw);
+  padding: 8px 8px 26px;
+  background: #fffdfa;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(99, 79, 96, 0.14);
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+}
+
+.backdrop-shot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #f2e2ee;
+}
+
+/* generated stand-in art, shown until a real photo is set */
+.backdrop-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  background: linear-gradient(135deg, #f5c3d1, #f7e7b0);
+}
+
+.backdrop-photo:nth-child(3n + 2) .backdrop-placeholder {
+  background: linear-gradient(135deg, #a9c9e8, #cbb7ea);
+}
+
+.backdrop-photo:nth-child(3n) .backdrop-placeholder {
+  background: linear-gradient(135deg, #a9dac8, #f7e2a4);
+}
+
+.backdrop-shot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.backdrop-shot img.loaded { display: block; }
+
+/* narrow screens: the side gutters are gone, so let the pictures read as
+   texture behind the content */
+@media (max-width: 720px) {
+  .backdrop-photo {
+    opacity: 0.7;
+  }
+}
+
+/* ---- grid ---- */
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 2rem auto 4rem;
+  padding: 0 1rem;
+}
+
+@media (max-width: 420px) {
+  .grid {
+    gap: 1.25rem;
+  }
+}
+
+.gift {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 200px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 420px) {
+  .gift {
+    width: 150px;
+  }
+}
+
+.gift[hidden] { display: none; }
+
+/* the ending box always gets its own row under the gifts */
+.gift.gift-ending {
+  width: 100%;
+}
+
+/* the ending box pops in when it appears */
+.gift.pop {
+  animation: gift-pop 0.4s ease;
+}
+
+@keyframes gift-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.gift:focus-visible {
+  outline: 2px solid #a75a83;
+  outline-offset: 6px;
+  border-radius: 8px;
+}
+
+/* ---- the box (pure CSS drawing) ---- */
+
+.box {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  transition: transform 0.2s ease;
+}
+
+.gift:not(.opened):hover .box { transform: translateY(-6px); }
+
+/* unopened boxes nudge their lid now and then: "tap me" */
+.gift:not(.opened) .lid { animation: lid-nudge 4s ease-in-out infinite; }
+.gift:nth-child(2n):not(.opened) .lid { animation-delay: -1.3s; }
+.gift:nth-child(3n):not(.opened) .lid { animation-delay: -2.6s; }
+
+@keyframes lid-nudge {
+  0%, 82%, 100% { transform: translateY(0) rotate(0); }
+  88% { transform: translateY(-5px) rotate(-3deg); }
+  94% { transform: translateY(-2px) rotate(2deg); }
+}
+
+/* ---- the ending: an envelope instead of a gift box ---- */
+
+.box.envelope {
+  width: 170px;
+  height: 116px;
+  margin-top: 70px; /* room for the open flap and the rising letter */
+  isolation: isolate; /* keep the envelope's layers inside its own stack */
+}
+
+.env-back,
+.env-front,
+.env-flap {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+}
+
+.env-back {
+  background: var(--accent, #c2b0dc);
+  filter: brightness(0.9);
+  box-shadow: 0 4px 10px rgba(99, 79, 96, 0.15);
+}
+
+.env-letter {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 8px;
+  height: 96px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 12px, #eadde6 12px 13px)
+      center 18px / 70% 60% no-repeat,
+    #fffdfa;
+  box-shadow: 0 1px 4px rgba(99, 79, 96, 0.18);
+  z-index: 1; /* above the back and the opened flap, below the front pocket */
+  transition: transform 0.65s ease 0.3s;
+}
+
+/* front pocket: everything except the V at the top, which the flap fills */
+.env-front {
+  background: var(--accent, #c2b0dc);
+  clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%);
+  z-index: 2;
+}
+
+.env-flap {
+  bottom: auto;
+  height: 67px;
+  background: var(--accent, #c2b0dc);
+  filter: brightness(1.06);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  transform: perspective(500px) rotateX(0deg);
+  z-index: 3;
+  transition: transform 0.5s ease, z-index 0s 0.25s;
+}
+
+.env-seal {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  border-radius: 50%;
+  background: #f7e7b0;
+  color: #c9788f;
+  font-size: 0.95rem;
+  line-height: 28px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  z-index: 4;
+  transition: opacity 0.2s ease;
+}
+
+/* opened: flap folds up behind the letter, letter slides out */
+.gift.opened .env-flap {
+  transform: perspective(500px) rotateX(180deg);
+  z-index: 0;
+}
+
+.gift.opened .env-letter { transform: translateY(-48px); }
+.gift.opened .env-seal { opacity: 0; }
+
+/* the last box glows until it is opened */
+.gift-ending:not(.opened) .box { animation: ending-glow 2.4s ease-in-out infinite; }
+
+@keyframes ending-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(194, 176, 220, 0)); }
+  50% { filter: drop-shadow(0 0 14px rgba(194, 176, 220, 0.95)); }
+}
+
+.body {
+  position: absolute;
+  inset: 32px 0 0 0;
+  background: var(--accent, #e8a8a0);
+  border-radius: 4px;
+}
+
+.body::before {          /* vertical ribbon */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 24px;
+  transform: translateX(-50%);
+  background: #f7e7b0;
+}
+
+.lid {
+  position: absolute;
+  top: 16px;
+  left: -10px;
+  right: -10px;
+  height: 36px;
+  background: var(--accent, #e8a8a0);
+  border-radius: 4px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+  transform-origin: center bottom;
+  transition: transform 0.55s ease, opacity 0.55s ease;
+}
+
+.lid::before {           /* horizontal ribbon across the lid */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 24px;
+  transform: translateX(-50%);
+  background: #f7e7b0;
+}
+
+.bow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 34px;
+  height: 24px;
+  transform: translateX(-50%);
+  background: #f7e7b0;
+  border-radius: 50% 50% 0 0;
+}
+
+/* opened: lid lifts and rotates off */
+.gift.opened .lid {
+  transform: translate(26px, -26px) rotate(14deg);
+}
+
+/* inside of the opened box: darker, so it reads as empty-but-still-a-box */
+.gift.opened .body { filter: brightness(0.93); }
+
+.gift-label {
+  font-weight: 600;
+  color: #7d6478;
+}
+
+/* opened boxes read as already-used, but stay clickable */
+.gift.opened .gift-label::after {
+  content: " ✓";
+  color: #8f748c;
+}
+
+/* ---- modal ---- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* above the page content, below the confetti */
+  background: rgba(99, 79, 96, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.visible { opacity: 1; }
+
+.modal-backdrop[hidden] { display: none; }
+
+.modal {
+  position: relative;
+  background: #fdf3f8;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+  transform: translateY(12px);
+  transition: transform 0.25s ease;
+}
+
+/* mini bunting strung across the top of the card */
+.modal .bunting {
+  --wave: 0.5;
+  height: 26px;
+  gap: 6px;
+  border-top-width: 2px;
+  margin: -1.5rem -1.5rem 0.5rem;
+}
+
+.modal .bunting .flag {
+  border-left-width: 7px;
+  border-right-width: 7px;
+  border-top-width: 19px;
+}
+
+.modal-backdrop.visible .modal { transform: translateY(0); }
+
+.modal-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.6rem;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #f9edf5;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #8f748c;
+  cursor: pointer;
+}
+
+.modal-photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  margin: 0.5rem auto 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f2e2ee;
+}
+
+/* generated stand-in art, shown until a real photo is set */
+.photo-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  background: linear-gradient(135deg, var(--accent, #e8a8a0), #f7e7b0);
+}
+
+.modal-photo-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.modal-photo-wrap img.loaded { display: block; }
+
+/* ribbon banner behind the reveal titles */
+.modal h2 {
+  display: inline-block;
+  margin: 0.75rem 0 0.25rem;
+  padding: 0.3em 1.5em;
+  font-size: 1.25rem;
+  color: #7a4e70;
+  background: #f5c3d1;
+  transform: rotate(-1.5deg);
+  clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%);
+}
+
+.modal p { margin: 0; line-height: 1.5; }
+
+/* ---- ending card (shown when every gift is open) ---- */
+
+.ending-card {
+  text-align: left;
+  background: #f9edf5;
+  border: 1px solid #ecd6e6;
+  border-top: 4px solid var(--accent, #c2b0dc);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.ending-photo {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  margin: 0 0 0.75rem;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.ending-card h2 { margin: 0 0 0.75rem; }
+
+.ending-card #modal-ending-body p {
+  margin: 0 0 0.75rem;
+  line-height: 1.6;
+}
+
+.ending-sign {
+  margin: 0.5rem 0 0;
+  text-align: right;
+  font-style: italic;
+  color: #9c7c96;
+}
+
+/* ---- confetti overlay (drawn by js/main.js) ---- */
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ---- reduced motion: skip the lid, show the modal immediately ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .env-letter,
+  .env-flap,
+  .env-seal,
+  .lid,
+  .modal-backdrop,
+  .modal {
+    transition: none;
+  }
+
+  .gift.opened .lid {
+    transform: translate(26px, -26px) rotate(14deg);
+  }
+
+  .gift:not(.opened) .lid,
+  .gift-ending:not(.opened) .box,
+  .gift.pop {
+    animation: none;
+  }
+
+  .box {
+    transition: none;
+  }
+}

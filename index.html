@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The tab title and page heading are replaced from js/gifts.js on load.
+       These generic values are fallbacks for before you customize it. -->
+  <title>Birthday Gift Boxes</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+  <div id="bunting" class="bunting" aria-hidden="true"></div>
+  <a class="reset-link" href="?reset" aria-label="Reset all boxes">reset</a>
+  <header class="page-header">
+    <h1 id="page-heading">Happy Birthday!</h1>
+    <p id="page-subhead" class="subhead">Tap a gift to open it.</p>
+    <p id="page-recipient" class="recipient"></p>
+  </header>
+
+  <main id="grid" class="grid" aria-label="Gift boxes"></main>
+
+  <div id="modal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="bunting modal-bunting" aria-hidden="true"></div>
+      <button id="modal-close" class="modal-close" aria-label="Close">&times;</button>
+
+      <div id="modal-gift">
+        <div class="modal-photo-wrap">
+          <div id="modal-placeholder" class="photo-placeholder"></div>
+          <img id="modal-photo" alt="">
+        </div>
+        <h2 id="modal-title"></h2>
+        <p id="modal-message"></p>
+      </div>
+
+      <div id="modal-ending" class="ending-card" hidden>
+        <img id="modal-ending-photo" class="ending-photo" alt="" hidden>
+        <h2 id="modal-ending-title"></h2>
+        <div id="modal-ending-body"></div>
+        <p id="modal-ending-sign" class="ending-sign"></p>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <script src="js/gifts.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
